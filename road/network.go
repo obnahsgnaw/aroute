@@ -250,13 +250,13 @@ func (s *Network) connectToNetwork(x, y float64, maxDistance float64, temp *Temp
 		ID: newNodeId,
 		m:  s,
 	}
-	p1 := *nearestEdge.From
-	p2 := *nearestEdge.To
-	nearestEdgeFromNode := &p1
+	p1 := deepCopyNode(nearestEdge.From)
+	p2 := deepCopyNode(nearestEdge.To)
+	nearestEdgeFromNode := p1
 	if v, ok := temp.GetNode(nearestEdgeFromNode.ID); ok {
 		nearestEdgeFromNode = v
 	}
-	nearestEdgeToNode := &p2
+	nearestEdgeToNode := p2
 	if v, ok := temp.GetNode(nearestEdgeToNode.ID); ok {
 		nearestEdgeToNode = v
 	}
@@ -321,6 +321,17 @@ func (s *Network) DelTemp(sessionId int64) {
 	defer s.tmpLock.Unlock()
 	if _, ok := s.temps[sessionId]; ok {
 		delete(s.temps, sessionId)
+	}
+}
+
+func deepCopyNode(n *Node) *Node {
+	edges := make([]*Edge, len(n.OutEdges))
+	copy(edges, n.OutEdges)
+	return &Node{
+		Point:    n.Point,
+		ID:       n.ID,
+		OutEdges: edges,
+		m:        n.m,
 	}
 }
 
